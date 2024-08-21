@@ -14,6 +14,7 @@ class FredDownloader(object):
         self.__headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
         }
+        self.__nan_char = '.'
         
         nest_asyncio.apply()
 
@@ -27,6 +28,13 @@ class FredDownloader(object):
         
         else:
             raise ValueError('Invalid compare type')
+    
+    def __convert_to_float(self, value: str):
+        if value == self.__nan_char:
+            return float('nan')
+
+        else:
+            return float(value.replace(',', ''))
     
     async def __fetch_data(self, session, url, params):
         async with session.get(url, params=params, headers=self.__headers) as response:
@@ -48,9 +56,11 @@ class FredDownloader(object):
             url = f'{self.__uri}/series/observations'
 
             resp = await self.__fetch_data(session, url, params={'api_key': self.__api_key, 'series_id': series_id, 'observation_start': adjusted_start, 'observation_end': adjusted_end, 'file_type': 'json'})
+            resp_dict = [{'date': observation['date'], 'value': self.__convert_to_float(observation['value'])} for observation in resp['observations']]
 
-            df = pd.DataFrame(resp['observations'])[['date', 'value']]
+            df = pd.DataFrame(resp_dict)
             df.set_index('date', inplace=True)
+            df['value'] = df['value'].astype(float)
             df.index = pd.to_datetime(df.index)
             df.sort_index(inplace=True)
 
