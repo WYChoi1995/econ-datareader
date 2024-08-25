@@ -46,10 +46,14 @@ eth_data = data['ETHUSDT']
 from econdatareader.fred import FredDownloader
 
 downloader = FredDownloader(api_key='your_api_key')
+id_table = downloader.search_series_by_keyword('core consumer price index')
 data = downloader.download_data(['Code1', 'Code2'], '2011-01-01', '2024-08-01')
 ```
 FRED 데이터를 다운로드하기 위해서는 FRED에서 API_KEY를 발급받아야 합니다. 아래 링크에서 회원가입 후 API_KEY를 발급받으세요.
   - https://fred.stlouisfed.org/
+  
+`search_series_by_keyword` 메서드의 인수는 아래와 같이 입력합니다.
+  - keyword: `str` 자료형으로 입력, 예를 들어 Core CPI의 id를 알고싶은 경우 `core consumer price index` 등으로 입력.
 
 `download_data` 메서드의 인수는 아래와 같이 입력합니다.
   - 데이터 id: `['Code1', 'Code2']`와 같이 입력
@@ -69,6 +73,7 @@ dollar_index_data = data['DTWEXBGS']
 from econdatareader.bok import BokDownloader
 
 downloader = BokDownloader(api_key='your_api_key')
+id_table = downloader.search_stat_code_by_keyword('소비자물가')
 data = downloader.download_data([('StatCode1', 'A', '2013', '2024', 'ItemCode1'), 
 ('StatCode2', 'Q', '2015Q1', '2024Q2', 'ItemCode2'),
 ('StatCode3', 'M', '201501', '202407' 'ItemCode3'),
@@ -76,6 +81,9 @@ data = downloader.download_data([('StatCode1', 'A', '2013', '2024', 'ItemCode1')
 ```
 한국은행 경제통계시스템 데이터를 다운로드하기 위해서는 아래 링크에서 회원가입 후 API_KEY를 발급받으세요.
  - https://ecos.bok.or.kr/api/#/
+
+`search_stat_code_by_keyword` 메서드의 인수는 아래와 같이 입력합니다.
+  - keyword: `str` 자료형으로 입력, 예를 들어 소비자물가지수의 STAT_CODE를 알고싶은 경우 `소비자물가지수`로 입력.
 
 `download_data` 메서드의 인수는 아래와 같이 입력합니다.
   - `(데이터 id, 시간간격, 시작시간, 종료시간, 데이터 서브 id)` 순으로 입력 (위 코드 예시 참조)

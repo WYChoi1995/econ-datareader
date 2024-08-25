@@ -1,5 +1,7 @@
 import aiohttp
 import asyncio
+import requests
+import re
 import pandas as pd
 import nest_asyncio
 import logging
@@ -18,6 +20,8 @@ class BokDownloader(object):
         self.__headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
         }
+
+        self.available_stats = self.__get_stat_table_list()
 
         nest_asyncio.apply()
     
@@ -44,6 +48,28 @@ class BokDownloader(object):
 
         else:
             raise ValueError('Invalid period')
+    
+    def __get_stat_table_list(self):
+        url = f'{self.__uri}/StatisticTableList/{self.__api_key}/json/kr/1/99999/'
+
+        try:
+            response = requests.get(url=url).json()
+            datas = response['StatisticTableList']['row']
+            
+            for data in datas:
+                data['STAT_NAME'] = re.sub(r'\d+\.', '', data['STAT_NAME'])
+            
+            df = pd.DataFrame(datas)
+
+            return df
+        
+        except KeyError:
+            logging.error('Error in fetching table.')
+
+    
+    def search_stat_code_by_keyword(self, keyword: str):
+        return self.available_stats.query(f"STAT_NAME.str.contains('{keyword}')")
+
 
     async def __fetch_data(self, session, url):
         async with session.get(url, headers=self.__headers) as response:

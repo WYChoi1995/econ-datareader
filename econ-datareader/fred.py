@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 import pandas as pd
+import requests
 import nest_asyncio
 import logging
 
@@ -35,12 +36,23 @@ class FredDownloader(object):
 
         else:
             return float(value.replace(',', ''))
+        
+    def search_series_id_by_keyword(self, keyword: str):
+        url = f'{self.__uri}/series/search'
+        resp = requests.get(url=url, params={'api_key': self.__api_key, 'search_text': keyword, 'file_type': 'json', 'order_by': 'search_rank'}).json()
+        
+        try:
+            data = resp['seriess']
+
+            return pd.DataFrame(data)[['title', 'id', 'observation_start', 'observation_end', 'frequency_short', 'units_short', 'seasonal_adjustment_short']]
+
+        except KeyError:
+            logging.error('Error in searching keyword')
     
     async def __fetch_data(self, session, url, params):
         async with session.get(url, params=params, headers=self.__headers) as response:
             return await response.json()
     
-
     async def __get_series_info(self, session, series_id):
         url = f'{self.__uri}/series'
         resp = await self.__fetch_data(session, url, params={'api_key': self.__api_key, 'series_id': series_id, 'file_type': 'json'})
