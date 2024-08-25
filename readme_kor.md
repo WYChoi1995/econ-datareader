@@ -1,5 +1,12 @@
 # Econ DataReader
 
+<div align="right">
+
+[![Pypi Package Ver.](https://img.shields.io/pypi/v/econ-datareader.svg)](https://pypi.org/project/econ-datareader/)
+[![License](https://img.shields.io/pypi/l/ansicolortags.svg)](https://img.shields.io/pypi/l/ansicolortags.svg)
+
+<div align="left">
+
 **Econ DataReader** 는 한국은행, FRED (미국 연방준비제도 경제 데이터), 국내외 금융상품 시세 데이터, 암호화폐 시세 데이터 등 다양한 출처에서 경제 및 금융 데이터를 쉽게 가져올 수 있도록 설계된 Python 라이브러리입니다. 이 도구는 데이터 수집을 간소화하고 데이터 과학 워크플로우에 쉽게 통합할 수 있습니다.
 
 ## 주요 기능
