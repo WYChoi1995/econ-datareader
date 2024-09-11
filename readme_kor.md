@@ -81,10 +81,12 @@ from econdatareader.bok import BokDownloader
 
 downloader = BokDownloader(api_key='your_api_key')
 id_table = downloader.search_stat_code_by_keyword('소비자물가')
-data = downloader.download_data([('StatCode1', 'A', '2013', '2024', 'ItemCode1'), 
-('StatCode2', 'Q', '2015Q1', '2024Q2', 'ItemCode2'),
-('StatCode3', 'M', '201501', '202407' 'ItemCode3'),
-('Statcode4', 'D', '20110101', '20240101', 'ItemCode4')])
+data = downloader.download_data(
+  [('StatCode1', 'A', '2013', '2024', 'ItemCode1', '', '', ''), 
+  ('StatCode2', 'Q', '2015Q1', '2024Q2', 'ItemCode2-1', 'ItemCode2-2', '', ''),
+  ('StatCode3', 'M', '201501', '202407' 'ItemCode3-1', 'ItemCode3-2', 'ItemCode3-3', 'ItemCode3-4'),
+  ('Statcode4', 'D', '20110101', '20240101', 'ItemCode4-1', 'ItemCode4-2', 'ItemCode4-3', '')]
+)
 ```
 한국은행 경제통계시스템 데이터를 다운로드하기 위해서는 아래 링크에서 회원가입 후 API_KEY를 발급받으세요.
  - https://ecos.bok.or.kr/api/#/
@@ -100,7 +102,7 @@ data = downloader.download_data([('StatCode1', 'A', '2013', '2024', 'ItemCode1')
     -  `M`의 경우 `YYYYMM` 형식으로 입력
     -  `Q`의 경우 `YYYYQd` 형식으로 입력 (`d=1,2,3,4`)
     -  `A`의 경우 `YYYY` 형식으로 입력
- - 데이터 id 및 데이터 서브 id는 한국은행 경제통계시스템을 참조하면 됨.
+ - 데이터 id 및 데이터 서브 id는 한국은행 경제통계시스템을 참조하면 됨. (서브 id는 최대 4개까지)
 
 
 데이터 호출은 아래와 같이 합니다. 위의 예시에서 `Statcode1`의 데이터를 불러오고 싶을 경우

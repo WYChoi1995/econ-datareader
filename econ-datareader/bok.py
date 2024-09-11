@@ -66,24 +66,29 @@ class BokDownloader(object):
         except KeyError:
             logging.error('Error in fetching table.')
 
-    
     def search_stat_code_by_keyword(self, keyword: str):
         return self.available_stats.query(f"STAT_NAME.str.contains('{keyword}')")
+    
+    def __make_code(self, stat_code, item_codes):
+        parsed_item_codes = [code for code in item_codes if code != '']
+        code_str = '-'.join(parsed_item_codes)
 
+        return f'{stat_code}-{code_str}'
 
     async def __fetch_data(self, session, url):
         async with session.get(url, headers=self.__headers) as response:
             return await response.json()
     
-    async def __get_series(self, session, stat_code, period, start, end, item_code):
+    async def __get_series(self, session, stat_code, period, start, end, item_code_1='', item_code_2='', item_code_3='', item_code_4=''):
         if period not in BokDownloader.AVAILABLE_PERIOD:
             raise ValueError('Invalid period')
         
         elif (self.__check_format(period, start) or self.__check_format(period, end)) is False:
             raise ValueError('Invalid date format')
 
-        url = f'{self.__uri}/StatisticSearch/{self.__api_key}/json/en/1/10000/{stat_code}/{period}/{start}/{end}/{item_code}'
+        url = f'{self.__uri}/StatisticSearch/{self.__api_key}/json/en/1/10000/{stat_code}/{period}/{start}/{end}/{item_code_1}/{item_code_2}/{item_code_3}/{item_code_4}'
         raw_datas = await self.__fetch_data(session, url)
+        code = self.__make_code(stat_code, [item_code_1, item_code_2, item_code_3, item_code_4])
 
         try:
             data = [{'time': raw_data['TIME'], 'value': float(raw_data['DATA_VALUE'].replace(',', ''))} for raw_data in raw_datas['StatisticSearch']['row']]
@@ -92,16 +97,17 @@ class BokDownloader(object):
             df.set_index('time', inplace=True)
             df.index = self.__convert_to_datetime(period, df.index)
 
-            return f'{stat_code}-{item_code}', df
+            return f'{stat_code}-{code}', df
 
         except KeyError:
-            logging.error(f'Invalid series id: {stat_code}-{item_code}')
+            logging.error(f'Invalid series id: {stat_code}-{code}')
 
-            return f'{stat_code}-{item_code}', None
+            return f'{stat_code}-{code}', None
     
     async def __get_multiple_series(self, request_infos: List[Tuple[str]]):
         async with aiohttp.ClientSession() as session:
-            tasks = [self.__get_series(session, request_info[0], request_info[2], request_info[3], request_info[4], request_info[1]) for request_info in request_infos]
+            tasks = [self.__get_series(session, stat_code=request_info[0], period=request_info[1], start=request_info[2], end=request_info[3], 
+                                       item_code_1=request_info[4], item_code_2=request_info[5], item_code_3=request_info[6], item_code_4=request_info[7]) for request_info in request_infos]
 
             return dict(await asyncio.gather(*tasks))
         

@@ -80,10 +80,12 @@ from econdatareader.bok import BokDownloader
 
 downloader = BokDownloader(api_key='your_api_key')
 id_table = downloader.search_stat_code_by_keyword('소비자물가')
-data = downloader.download_data([('StatCode1', 'A', '2013', '2024', 'ItemCode1'), 
-('StatCode2', 'Q', '2015Q1', '2024Q2', 'ItemCode2'),
-('StatCode3', 'M', '201501', '202407' 'ItemCode3'),
-('Statcode4', 'D', '20110101', '20240101', 'ItemCode4')])
+data = downloader.download_data(
+  [('StatCode1', 'A', '2013', '2024', 'ItemCode1', '', '', ''), 
+  ('StatCode2', 'Q', '2015Q1', '2024Q2', 'ItemCode2-1', 'ItemCode2-2', '', ''),
+  ('StatCode3', 'M', '201501', '202407' 'ItemCode3-1', 'ItemCode3-2', 'ItemCode3-3', 'ItemCode3-4'),
+  ('Statcode4', 'D', '20110101', '20240101', 'ItemCode4-1', 'ItemCode4-2', 'ItemCode4-3', '')]
+)
 ```
 To download data from the Bank of Korea's economic statistics system, you need to obtain an API_KEY. You can sign up and get your API_KEY from the following link:
  - https://ecos.bok.or.kr/api/#/
@@ -99,7 +101,7 @@ The arguments for the `download_data` method are as follows:
     - For `M`, enter as `YYYYMM` format
     - For `Q`, enter as `YYYYQd` format (`d=1,2,3,4`)
     - For `A`, enter as `YYYY` format
- - Data ID and Data Sub ID can be referenced from the Bank of Korea's economic statistics system.
+ - Data ID and Data Sub ID can be referenced from the Bank of Korea's economic statistics system. (Sub IDs can be up to 4)
 
 To retrieve data, you can use the following. For instance, to get the data for `Statcode1` from the example above:
 ```python

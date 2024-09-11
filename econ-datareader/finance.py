@@ -182,23 +182,29 @@ class FinanceDownloader(object):
         end_time = self.__convert_datetime_to_ts(end, True)
         temp_start = end_time - 499 * interval_convert
 
-        while temp_start > start_time:
-            if self.__binance_rate_count >= 1500:
-                await asyncio.sleep(60)
-                self.__binance_rate_count = 0
-
+        if temp_start <= start_time:
             params = {'symbol': ticker, 'interval': interval, 'startTime': temp_start, 'endTime': end_time}
-            resp = await self.__fetch_data_crypto(session, self.__binance_futures_uri, params)
+            resp = await self.__fetch_data_crypto(session, self.__binance_spot_uri, params)
+            candle_datas.append(resp)
 
-            if 'code' not in resp:
-                candle_datas.append(resp)
+        else:
+            while temp_start > start_time:
+                if self.__binance_rate_count >= 1500:
+                    await asyncio.sleep(60)
+                    self.__binance_rate_count = 0
 
-            else:
-                logging.error(f'{resp}')
-                break
+                params = {'symbol': ticker, 'interval': interval, 'startTime': temp_start, 'endTime': end_time}
+                resp = await self.__fetch_data_crypto(session, self.__binance_futures_uri, params)
 
-            end_time = temp_start
-            temp_start = end_time - 499 * interval_convert
+                if 'code' not in resp:
+                    candle_datas.append(resp)
+
+                else:
+                    logging.error(f'{resp}')
+                    break
+
+                end_time = temp_start
+                temp_start = end_time - 499 * interval_convert
     
         df = pd.DataFrame([candle_datum for candle_data in candle_datas for candle_datum in candle_data])[[0,1,2,3,4,5,9]]
         df.columns = ['time', 'open', 'high', 'low', 'close', 'volume', 'takerBuyBase']
@@ -222,23 +228,29 @@ class FinanceDownloader(object):
         end_time = self.__convert_datetime_to_ts(end, True)
         temp_start = end_time - 500 * interval_convert
 
-        while temp_start > start_time:
-            if self.__binance_rate_count >= 1500:
-                await asyncio.sleep(60)
-                self.__binance_rate_count = 0
-
+        if temp_start <= start_time:
             params = {'symbol': ticker, 'interval': interval, 'startTime': temp_start, 'endTime': end_time}
             resp = await self.__fetch_data_crypto(session, self.__binance_spot_uri, params)
+            candle_datas.append(resp)
 
-            if 'code' not in resp:   
-                candle_datas.append(resp)
+        else:
+            while temp_start > start_time:
+                if self.__binance_rate_count >= 1500:
+                    await asyncio.sleep(60)
+                    self.__binance_rate_count = 0
 
-            else:
-                logging.error(f'{resp}')
-                break
-            
-            end_time = temp_start
-            temp_start = end_time - 500 * interval_convert
+                params = {'symbol': ticker, 'interval': interval, 'startTime': temp_start, 'endTime': end_time}
+                resp = await self.__fetch_data_crypto(session, self.__binance_spot_uri, params)
+
+                if 'code' not in resp:   
+                    candle_datas.append(resp)
+
+                else:
+                    logging.error(f'{resp}')
+                    break
+                
+                end_time = temp_start
+                temp_start = end_time - 500 * interval_convert
 
         df = pd.DataFrame([candle_datum for candle_data in candle_datas for candle_datum in candle_data])[[0,1,2,3,4,5,9]]
         df.columns = ['time', 'open', 'high', 'low', 'close', 'volume', 'takerBuyBase']
