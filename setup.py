@@ -4,8 +4,8 @@ with open('readme.md', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='econ-datareader',
-    version='0.2.7',
+    name='econ_datareader',
+    version='1.0.1',
     description='Download Econ Data - Macro and Finance',
     long_description=long_description,
     long_description_content_type='text/markdown',
