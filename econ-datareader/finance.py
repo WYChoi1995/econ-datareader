@@ -183,8 +183,8 @@ class FinanceDownloader(object):
         temp_start = end_time - 499 * interval_convert
 
         if temp_start <= start_time:
-            params = {'symbol': ticker, 'interval': interval, 'startTime': temp_start, 'endTime': end_time}
-            resp = await self.__fetch_data_crypto(session, self.__binance_spot_uri, params)
+            params = {'symbol': ticker, 'interval': interval, 'startTime': start_time, 'endTime': end_time}
+            resp = await self.__fetch_data_crypto(session, self.__binance_futures_uri, params)
             candle_datas.append(resp)
 
         else:
@@ -229,7 +229,7 @@ class FinanceDownloader(object):
         temp_start = end_time - 500 * interval_convert
 
         if temp_start <= start_time:
-            params = {'symbol': ticker, 'interval': interval, 'startTime': temp_start, 'endTime': end_time}
+            params = {'symbol': ticker, 'interval': interval, 'startTime': start_time, 'endTime': end_time}
             resp = await self.__fetch_data_crypto(session, self.__binance_spot_uri, params)
             candle_datas.append(resp)
 
