@@ -251,21 +251,26 @@ class FinanceDownloader(object):
                 
                 end_time = temp_start
                 temp_start = end_time - 500 * interval_convert
+        try:
+            df = pd.DataFrame([candle_datum for candle_data in candle_datas for candle_datum in candle_data])[[0,1,2,3,4,5,9]]
+            df.columns = ['time', 'open', 'high', 'low', 'close', 'volume', 'takerBuyBase']
+            df['open'] = df['open'].astype(float)
+            df['high'] = df['high'].astype(float)
+            df['low'] = df['low'].astype(float)
+            df['close'] = df['close'].astype(float)
+            df['volume'] = df['volume'].astype(float)
+            df['takerBuyBase'] = df['takerBuyBase'].astype(float)
+            df.drop_duplicates(inplace=True, subset=['time'])
+            df.set_index('time', inplace=True)
+            df.index = pd.to_datetime(df.index, unit='ms')
+            df.sort_index(inplace=True)
+            
+            return ticker, df
 
-        df = pd.DataFrame([candle_datum for candle_data in candle_datas for candle_datum in candle_data])[[0,1,2,3,4,5,9]]
-        df.columns = ['time', 'open', 'high', 'low', 'close', 'volume', 'takerBuyBase']
-        df['open'] = df['open'].astype(float)
-        df['high'] = df['high'].astype(float)
-        df['low'] = df['low'].astype(float)
-        df['close'] = df['close'].astype(float)
-        df['volume'] = df['volume'].astype(float)
-        df['takerBuyBase'] = df['takerBuyBase'].astype(float)
-        df.drop_duplicates(inplace=True, subset=['time'])
-        df.set_index('time', inplace=True)
-        df.index = pd.to_datetime(df.index, unit='ms')
-        df.sort_index(inplace=True)
-        
-        return ticker, df
+        except KeyError:
+            logging.error(f'{ticker}: Unable to make dataframe')
+
+            return ticker, None
 
     async def __get_upbit_spot_data(self, session, ticker, interval, start, end):
         candle_datas = []
@@ -290,16 +295,22 @@ class FinanceDownloader(object):
                 candle_datas.append(resp)
                 end_time_param = resp[-1]['candle_date_time_utc']
                 end_time = resp[-1]['timestamp']
-
-        df = pd.concat([pd.DataFrame(data) for data in candle_datas], axis=0)
-        df.columns = ['market', 'time', 'time_KST', 'open', 'high', 'low', 'close', 'ts', 'amt', 'volume', 'unit']
-        df.drop(columns=['market', 'time_KST', 'unit', 'ts'], inplace=True)
-        df.drop_duplicates(inplace=True, subset=['time'])
-        df.set_index('time', inplace=True)
-        df.index = pd.to_datetime(df.index)
-        df.sort_index(inplace=True)
         
-        return ticker, df
+        try:
+            df = pd.concat([pd.DataFrame(data) for data in candle_datas], axis=0)
+            df.columns = ['market', 'time', 'time_KST', 'open', 'high', 'low', 'close', 'ts', 'amt', 'volume', 'unit']
+            df.drop(columns=['market', 'time_KST', 'unit', 'ts'], inplace=True)
+            df.drop_duplicates(inplace=True, subset=['time'])
+            df.set_index('time', inplace=True)
+            df.index = pd.to_datetime(df.index)
+            df.sort_index(inplace=True)
+        
+            return ticker, df
+        
+        except KeyError:
+            logging.error(f'{ticker}: Unable to make dataframe')
+
+            return ticker, None
 
     async def __get_multiple_korea_stock_data(self, tickers, interval, start, end):
         if interval not in FinanceDownloader.KOREA_STOCK_VALID_INTERVAL:
