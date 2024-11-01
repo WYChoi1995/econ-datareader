@@ -119,7 +119,7 @@ class FinanceDownloader(object):
                 df = pd.DataFrame(resp)
                 df.drop_duplicates(inplace=True, subset=['localDate'])
                 df.set_index('localDate', inplace=True)
-                df.index = pd.to_datetime(df.index, format='%Y%m%d%H%M%S')
+                df.index = pd.to_datetime(df.index, format='%Y%m%d')
                 df.sort_index(inplace=True)
                 df.ffill(inplace=True)
                 
