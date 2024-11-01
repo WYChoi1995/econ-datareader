@@ -105,14 +105,25 @@ class FinanceDownloader(object):
         resp = await self.__fetch_data_tradfi(session, url, params={'startDateTime': start, 'endDateTime': end})
 
         if 'code' not in resp:
-            df = pd.DataFrame(resp)
-            df.drop_duplicates(inplace=True, subset=['localDateTime'])
-            df.set_index('localDateTime', inplace=True)
-            df.index = pd.to_datetime(df.index, format='%Y%m%d%H%M%S')
-            df.sort_index(inplace=True)
-            df.ffill(inplace=True)
+            if 'minute' in interval:
+                df = pd.DataFrame(resp)
+                df.drop_duplicates(inplace=True, subset=['localDateTime'])
+                df.set_index('localDateTime', inplace=True)
+                df.index = pd.to_datetime(df.index, format='%Y%m%d%H%M%S')
+                df.sort_index(inplace=True)
+                df.ffill(inplace=True)
+                
+                return ticker, df
             
-            return ticker, df
+            else:
+                df = pd.DataFrame(resp)
+                df.drop_duplicates(inplace=True, subset=['localDate'])
+                df.set_index('localDate', inplace=True)
+                df.index = pd.to_datetime(df.index, format='%Y%m%d%H%M%S')
+                df.sort_index(inplace=True)
+                df.ffill(inplace=True)
+                
+                return ticker, df
         
         else:
             logging.error(f'Error on fetching: Code {resp["code"]} Msg {resp["message"]}')
